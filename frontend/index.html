@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>eVote – Election Management System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ============ Sidebar ============ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-mark">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11h16v9H4zM8 11V5h8v6M10 8l1.5 1.5L14.5 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div>
+        <div class="brand-name">eVote</div>
+        <div class="brand-sub">Election Management</div>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <button class="nav-item active" data-view="dashboard">
+        <svg viewBox="0 0 24 24"><path d="M4 4h7v7H4zM13 4h7v4h-7zM13 10h7v10h-7zM4 13h7v7H4z"/></svg>Dashboard
+      </button>
+      <button class="nav-item" data-view="register">
+        <svg viewBox="0 0 24 24"><path d="M15 19v-1a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v1M9 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19 8v6M16 11h6"/></svg>Voter Registration
+      </button>
+      <button class="nav-item" data-view="candidates">
+        <svg viewBox="0 0 24 24"><path d="M17 20v-1a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v1M10 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM21 20v-1a4 4 0 0 0-3-3.9M16 5.1a3 3 0 0 1 0 5.8"/></svg>Candidates
+      </button>
+      <button class="nav-item" data-view="vote">
+        <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4M5 4h14v16H5z"/></svg>Cast Vote
+      </button>
+      <button class="nav-item" data-view="results">
+        <svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Results
+      </button>
+      <button class="nav-item" data-view="admin">
+        <svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z"/></svg>Admin Panel
+      </button>
+    </nav>
+
+    <div class="sidebar-foot">
+      <div class="engine-chip"><span class="dot"></span>Logic engine: C → WebAssembly</div>
+    </div>
+  </aside>
+  <div class="scrim" id="scrim"></div>
+
+  <!-- ============ Main ============ -->
+  <main class="main">
+    <header class="topbar">
+      <button class="menu-btn" id="menuBtn" aria-label="Open menu">
+        <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+      <div>
+        <h1 id="pageTitle">Dashboard</h1>
+        <p class="page-sub" id="pageSub">Overview of the current election</p>
+      </div>
+      <div class="topbar-right">
+        <span class="badge" id="stateBadge">—</span>
+        <span class="badge badge-admin hidden" id="adminBadge">Admin</span>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- ===== Dashboard ===== -->
+      <section class="view active" id="view-dashboard">
+        <div class="stats">
+          <div class="stat"><div class="stat-label">Registered Voters</div><div class="stat-value" id="statVoters">0</div></div>
+          <div class="stat"><div class="stat-label">Candidates</div><div class="stat-value" id="statCandidates">0</div></div>
+          <div class="stat"><div class="stat-label">Votes Cast</div><div class="stat-value" id="statVotes">0</div></div>
+          <div class="stat"><div class="stat-label">Voter Turnout</div><div class="stat-value" id="statTurnout">0%</div>
+            <div class="meter"><span id="turnoutBar"></span></div></div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-head"><h2>Election Progress</h2></div>
+            <ol class="stepper" id="stepper">
+              <li data-step="0"><span class="step-dot">1</span><div><strong>Setup</strong><p>Admin registers candidates</p></div></li>
+              <li data-step="1"><span class="step-dot">2</span><div><strong>Voting Open</strong><p>Registered voters cast votes</p></div></li>
+              <li data-step="2"><span class="step-dot">3</span><div><strong>Closed</strong><p>Winner is declared</p></div></li>
+            </ol>
+          </div>
+          <div class="card">
+            <div class="card-head"><h2>Live Standings</h2><button class="link-btn" data-goto="results">View results →</button></div>
+            <div id="dashStandings"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== Voter Registration ===== -->
+      <section class="view" id="view-register">
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-head"><h2>Register a Voter</h2></div>
+            <form id="voterForm" class="form" autocomplete="off">
+              <label>Full name<input type="text" id="voterName" maxlength="49" placeholder="e.g. Asha Verma" required></label>
+              <label>Age<input type="number" id="voterAge" min="0" max="120" placeholder="18 or above" required></label>
+              <p class="hint">Only citizens aged 18 or above are eligible. Age is verified by the C engine.</p>
+              <button class="btn btn-primary" type="submit">Register Voter</button>
+            </form>
+          </div>
+          <div class="card voter-id-card empty" id="voterIdCard">
+            <div class="id-placeholder">The new Voter ID will appear here after registration.</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><h2>Registered Voters</h2><span class="muted" id="voterCountLabel"></span></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Voter ID</th><th>Name</th><th>Age</th><th>Status</th></tr></thead>
+              <tbody id="voterTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== Candidates ===== -->
+      <section class="view" id="view-candidates">
+        <div class="card" id="candidateFormCard">
+          <div class="card-head"><h2>Add Candidate</h2></div>
+          <form id="candidateForm" class="form form-row" autocomplete="off">
+            <label>Candidate name<input type="text" id="candName" maxlength="49" required></label>
+            <label>Party<input type="text" id="candParty" maxlength="49" required></label>
+            <button class="btn btn-primary" type="submit">Add Candidate</button>
+          </form>
+        </div>
+        <div class="notice hidden" id="candidateLock"></div>
+        <div class="cand-grid" id="candidateGrid"></div>
+      </section>
+
+      <!-- ===== Cast Vote ===== -->
+      <section class="view" id="view-vote">
+        <div class="notice hidden" id="voteClosed"></div>
+
+        <div id="voteFlow">
+          <div class="card" id="voteStep1">
+            <div class="card-head"><h2>Step 1 · Verify your Voter ID</h2></div>
+            <form id="verifyForm" class="form form-row" autocomplete="off">
+              <label>Voter ID<input type="number" id="verifyId" placeholder="e.g. 1001" required></label>
+              <button class="btn btn-primary" type="submit">Verify</button>
+            </form>
+          </div>
+
+          <div class="card hidden" id="voteStep2">
+            <div class="card-head">
+              <h2>Step 2 · Choose a candidate</h2>
+              <button class="link-btn" id="changeVoter">Change voter</button>
+            </div>
+            <p class="voter-greet" id="voterGreet"></p>
+            <div class="ballot" id="ballot"></div>
+            <div class="ballot-actions">
+              <button class="btn btn-primary" id="reviewVote" disabled>Review &amp; Submit</button>
+            </div>
+          </div>
+
+          <div class="card success-card hidden" id="voteDone">
+            <div class="success-icon">
+              <svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg>
+            </div>
+            <h2>Your vote has been recorded</h2>
+            <p class="muted">Thank you for participating. Each voter can vote only once.</p>
+            <button class="btn btn-outline" id="nextVoter">Next voter</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== Results ===== -->
+      <section class="view" id="view-results">
+        <div class="result-banner" id="resultBanner"></div>
+        <div class="card">
+          <div class="card-head"><h2>Votes per Candidate</h2><span class="muted" id="resultTotal"></span></div>
+          <div class="bars" id="resultBars"></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h2>Detailed Results</h2></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Rank</th><th>ID</th><th>Candidate</th><th>Party</th><th class="num">Votes</th><th class="num">Share</th></tr></thead>
+              <tbody id="resultTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== Admin ===== -->
+      <section class="view" id="view-admin">
+        <div class="card narrow" id="adminLogin">
+          <div class="card-head"><h2>Admin Login</h2></div>
+          <form id="loginForm" class="form" autocomplete="off">
+            <label>Admin PIN<input type="password" id="adminPin" inputmode="numeric" required></label>
+            <p class="hint">Demo PIN: 1234 (defined in voting.h)</p>
+            <button class="btn btn-primary" type="submit">Login</button>
+          </form>
+        </div>
+
+        <div class="hidden" id="adminPanel">
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-head"><h2>Election Control</h2></div>
+              <p class="muted" id="adminStateText"></p>
+              <div class="btn-row">
+                <button class="btn btn-primary" id="startBtn">Start Election</button>
+                <button class="btn btn-danger" id="endBtn">End Election &amp; Declare Result</button>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-head"><h2>Session</h2></div>
+              <p class="muted">Data is saved in this browser. Resetting clears all voters, candidates and votes.</p>
+              <div class="btn-row">
+                <button class="btn btn-outline" id="logoutBtn">Logout</button>
+                <button class="btn btn-outline-danger" id="resetBtn">Reset All Data</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ============ Confirm modal ============ -->
+  <div class="modal hidden" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-box">
+      <h3 id="modalTitle">Confirm</h3>
+      <div id="modalBody"></div>
+      <div class="btn-row end">
+        <button class="btn btn-outline" id="modalCancel">Cancel</button>
+        <button class="btn btn-primary" id="modalOk">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="tooltip hidden" id="tooltip"></div>
+  <div class="toasts" id="toasts"></div>
+
+  <!-- Shown until the C engine is ready -->
+  <div class="loader" id="loader">
+    <div class="spinner"></div>
+    <p id="loaderText">Loading C engine…</p>
+  </div>
+
+  <!-- app.js must load first: it defines Module, which voting.js (Emscripten) uses -->
+  <script src="js/app.js"></script>
+  <script src="../wasm/voting.js" onerror="engineMissing()"></script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+# Compiled console program
+voting_console
+*.o
+
+# macOS
+.DS_Store
